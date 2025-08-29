@@ -1,0 +1,194 @@
+<!-- {% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <title>Bill Detail</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="p-6 bg-base-200">
+    <div class="max-w-4xl mx-auto bg-white shadow p-6 rounded-xl">
+        <h1 class="text-2xl font-bold mb-4">Bill {{ bill.bill_number }}</h1>
+        <div class="grid md:grid-cols-2 gap-4 mb-4">
+            <div>
+                <label class="block mb-1 font-semibold">Customer</label>
+                <input type="text" class="input input-bordered w-full bg-base-200" value="{{ bill.customer.name }}" readonly />
+            </div>
+            <div>
+                <label class="block mb-1 font-semibold">Status</label>
+                <span class="badge badge-outline">{{ bill.payment_status }}</span>
+            </div>
+            <div>
+                <label class="block mb-1 font-semibold">Issued on</label>
+                <input type="text" class="input input-bordered w-full bg-base-200" value="{{ bill.date|date:"d M, Y H:i" }}" readonly />
+            </div>
+            {% if bill.due_date %}
+            <div>
+                <label class="block mb-1 font-semibold">Due Date</label>
+                <input type="text" class="input input-bordered w-full bg-base-200" value="{{ bill.due_date|date:'d M, Y' }}" readonly />
+            </div>
+            {% endif %}
+            {% if bill.notes %}
+            <div class="col-span-2">
+                <label class="block mb-1 font-semibold">Notes</label>
+                <textarea class="textarea textarea-bordered w-full bg-base-200" readonly>{{ bill.notes }}</textarea>
+            </div>
+            {% endif %}
+        </div>
+        <h2 class="font-semibold mt-6 mb-2">Items</h2>
+        <div class="overflow-x-auto">
+            <table class="table table-sm w-full border table-zebra">
+                <thead class="bg-base-200 text-center">
+                    <tr>
+                        <th>Sr.</th>
+                        <th>Product</th>
+                        <th>Qty</th>
+                        <th>Rate (Rs.)</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in bill.items.all %}
+                    <tr class="text-center">
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ item.product }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.price }}</td>
+                        <td>{{ item.total }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="text-center">No items in this bill.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="grid grid-cols-2 gap-4 mt-6 mb-2">
+            <div class="font-semibold">Subtotal: <span class="font-normal">Rs. {{ bill.subtotal }}</span></div>
+            <div class="font-semibold">Tax: <span class="font-normal">Rs. {{ bill.tax }}</span></div>
+            <div class="font-semibold">Discount: <span class="font-normal">Rs. {{ bill.discount }}</span></div>
+            <div class="font-semibold text-xl col-span-2">Total Amount: <span class="font-bold">Rs. {{ bill.total_amount }}</span></div>
+        </div>
+    </div>
+</body>
+</html> -->
+
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Bill - Print Format</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: #fff !important;
+        }
+        .bill-border { border: 1.5px solid #2563eb; }
+        .bill-table th, .bill-table td { border: 1px solid #2563eb; }
+        .bill-table { border-collapse: collapse; width: 100%; }
+        .bill-header { color: #2563eb; font-family: 'Times New Roman', serif; font-weight: bold; font-size: 2.2rem; }
+        .bill-label { color: #2563eb; font-weight: 700; }
+        .bill-small { font-size: 0.9rem; }
+    </style>
+</head>
+<body class="bg-white text-black">
+    <div class="bill-border m-2 p-2">
+        <div class="text-center mb-2">
+            <div class="bill-header tracking-wider">RAHUL ENGINEERING WORKS</div>
+            <div class="bill-small">Manufacturing of: Precision Parts & Machining Jobs</div>
+            <div class="bill-small mb-2">Matruchhaya Complex, In front Coco-Cola Company, At Post Kudus, Tal. Wada, Dist. Palghar</div>
+        </div>
+        <div class="flex justify-between bill-small mb-2">
+            <div>
+                <span class="bill-label">Bill No.:</span> <span class="border px-2 py-1">{{ bill.bill_number }}</span>
+                <span class="ml-5 bill-label">Date:</span> <span class="border px-2 py-1">{{ bill.date|date:"d M, Y" }}</span>
+            </div>
+            <div>
+                <span class="bill-label">Mob. 9665293429, 8796445025</span>
+            </div>
+        </div>
+        <div class="flex justify-between bill-small mb-1">
+            <div>
+                <span class="bill-label">M/s.:</span>
+                <span class="border px-2 py-1">{{ bill.customer.name }}</span>
+                {% if bill.customer.address %}
+                <span class="ml-3 border px-2 py-1">{{ bill.customer.address }}</span>
+                {% endif %}
+            </div>
+            <div>
+                <span class="bill-label">Status:</span>
+                <span class="border px-2 py-1">{{ bill.payment_status }}</span>
+            </div>
+        </div>
+        <!-- Details Bar -->
+        <div class="grid grid-cols-4 gap-1 bill-small mb-2">
+            <div>
+                <span class="bill-label">Our Challan No.:</span> ___________________
+            </div>
+            <div>
+                <span class="bill-label">Date:</span> ___________
+            </div>
+            <div>
+                <span class="bill-label">Your Challan No.:</span> ___________
+            </div>
+            <div>
+                <span class="bill-label">Date:</span> ___________
+            </div>
+        </div>
+        <!-- Table -->
+        <table class="bill-table mb-2">
+            <thead>
+                <tr class="bg-blue-100 text-blue-800">
+                    <th class="px-2 py-1 text-center bill-small">Sr No.</th>
+                    <th class="px-2 py-1 text-center bill-small">DESCRIPTION</th>
+                    <th class="px-2 py-1 text-center bill-small">Qty.</th>
+                    <th class="px-2 py-1 text-center bill-small">Rate Rs.</th>
+                    <th class="px-2 py-1 text-center bill-small">Amount Rs.</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in bill.items.all %}
+                <tr>
+                    <td class="px-2 py-1 text-center bill-small">{{ forloop.counter }}</td>
+                    <td class="px-2 py-1 bill-small">{{ item.product }}</td>
+                    <td class="px-2 py-1 text-center bill-small">{{ item.quantity }}</td>
+                    <td class="px-2 py-1 text-right bill-small">{{ item.price }}</td>
+                    <td class="px-2 py-1 text-right bill-small">{{ item.total }}</td>
+                </tr>
+                {% endfor %}
+                {% for i in "1234567890" %}
+                {% if forloop.counter0 >= bill.items.count and forloop.counter <= 10 %}
+                <tr>
+                    <td class="px-2 py-1 bill-small">&nbsp;</td>
+                    <td class="px-2 py-1 bill-small">&nbsp;</td>
+                    <td class="px-2 py-1 bill-small">&nbsp;</td>
+                    <td class="px-2 py-1 bill-small">&nbsp;</td>
+                    <td class="px-2 py-1 bill-small">&nbsp;</td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+        <!-- Subtotal, GST, etc. -->
+        <div class="flex justify-between mb-1 bill-small">
+            <div>
+                <span class="bill-label">Subtotal: </span>Rs. {{ bill.subtotal }} &nbsp;&nbsp;
+                <span class="bill-label">Tax: </span>Rs. {{ bill.tax }} &nbsp;&nbsp;
+                <span class="bill-label">Discount: </span>Rs. {{ bill.discount }}
+            </div>
+            <div class="bill-label">G. TOTAL: Rs. {{ bill.total_amount }}</div>
+        </div>
+        <div class="flex justify-between bill-small mb-1">
+            <span><span class="bill-label">PAN No.:</span> AAKPY3012A</span>
+            <span class="bill-label">For, Rahul Engineering Works</span>
+        </div>
+        <div class="flex justify-between bill-small mt-2">
+            <span>Rupees In Words: {{ rupees_in_words }} only</span>
+            <span>Prepared By _____________________ </span>
+        </div>
+    </div>
+</body>
+</html>

@@ -14,3 +14,6 @@ def create_bill(request):
         bill = serializer.save()
         return Response(BillSerializer(bill).data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+def edit_bill(request):
+    pass

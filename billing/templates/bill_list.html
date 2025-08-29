@@ -1,0 +1,45 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Bills List</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="p-6 bg-base-200">
+    <div class="max-w-4xl mx-auto bg-white shadow p-6 rounded-xl">
+        <h1 class="text-2xl font-bold mb-4">Bills</h1>
+
+        <ul class="divide-y divide-gray-200">
+            {% for bill in bills %}
+            <li class="py-2">
+                <a href="{% url 'bill_detail_htmx' bill.pk %}" class="text-blue-600 hover:underline">
+                    {{ bill.bill_number }} - {{ bill.customer.name }}
+                </a>
+                <!-- <button 
+                    hx-get="{% url 'bill_detail_htmx' bill.pk %}" 
+                    hx-target="#bill-detail" 
+                    hx-swap="innerHTML"
+                    class="text-blue-600 hover:underline"
+                >
+                    {{ bill.bill_number }} - {{ bill.customer.name }}
+                </button> -->
+            </li>
+            {% empty %}
+            <li>No bills found.</li>
+            {% endfor %}
+        </ul>
+
+        <hr class="my-6" />
+
+        <div id="bill-detail">
+            <p>Select a bill to see details here.</p>
+        </div>
+    </div>
+</body>
+
+</html>
