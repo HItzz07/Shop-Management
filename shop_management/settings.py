@@ -53,11 +53,12 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'shop_management.urls'
-
+BASE_DIR = Path(__file__).resolve().parent.parent
+print(BASE_DIR)
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / "shop_management"/ "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

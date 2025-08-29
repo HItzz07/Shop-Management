@@ -6,9 +6,42 @@ def new_bill(request):
     customers = Customer.objects.all()
     return render(request, 'new_bill.html', {'customers': customers})
 
+# def bills_list(request):
+#     bills = Bill.objects.select_related('customer').all()
+#     return render(request, "bill_list.html", {"bills": bills})
+
 def bills_list(request):
     bills = Bill.objects.select_related('customer').all()
+    
+    # Search functionality
+    search = request.GET.get('search')
+    if search:
+        bills = bills.filter(
+            Q(bill_number__icontains=search) | 
+            Q(customer__name__icontains=search) |
+            Q(customer__phone__icontains=search)
+        )
+    
+    # Filter by payment status
+    status = request.GET.get('status')
+    if status:
+        bills = bills.filter(payment_status=status)
+    
+    # Filter by date range
+    date_from = request.GET.get('date_from')
+    date_to = request.GET.get('date_to')
+    if date_from:
+        bills = bills.filter(date__date__gte=date_from)
+    if date_to:
+        bills = bills.filter(date__date__lte=date_to)
+    
+    # Sorting
+    ordering = request.GET.get('ordering', '-date')  # Default sort by date descending
+    if ordering:
+        bills = bills.order_by(ordering)
+    
     return render(request, "bill_list.html", {"bills": bills})
+
 
 
 def bill_detail_htmx(request, pk):

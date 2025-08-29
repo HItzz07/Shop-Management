@@ -1,7 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
-
 <head>
     <meta charset="utf-8" />
     <title>Bills List</title>
@@ -9,37 +8,165 @@
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-
 <body class="p-6 bg-base-200">
-    <div class="max-w-4xl mx-auto bg-white shadow p-6 rounded-xl">
-        <h1 class="text-2xl font-bold mb-4">Bills</h1>
+    <div class="col-span-4 relative flex items-center">
+        <!-- Left -->
+        <a href="{% url 'dashboard' %}" class="btn btn-sm btn-outline btn-primary my-1">
+            🏠
+        </a>
 
-        <ul class="divide-y divide-gray-200">
-            {% for bill in bills %}
-            <li class="py-2">
-                <a href="{% url 'bill_detail_htmx' bill.pk %}" class="text-blue-600 hover:underline">
-                    {{ bill.bill_number }} - {{ bill.customer.name }}
-                </a>
-                <!-- <button 
-                    hx-get="{% url 'bill_detail_htmx' bill.pk %}" 
-                    hx-target="#bill-detail" 
-                    hx-swap="innerHTML"
-                    class="text-blue-600 hover:underline"
-                >
-                    {{ bill.bill_number }} - {{ bill.customer.name }}
-                </button> -->
-            </li>
-            {% empty %}
-            <li>No bills found.</li>
-            {% endfor %}
-        </ul>
+        <!-- Center -->
+        <h1 class="absolute left-1/2 -translate-x-1/2 text-2xl font-bold">
+            Bills Management
+        </h1>
+    </div>
+    <div class="max-w-7xl mx-auto bg-white shadow p-6 rounded-xl">
+        
+        <!-- Filters Section -->
+        <div class="mb-6 p-4 bg-base-100 rounded-lg">
+            <h3 class="font-semibold mb-3">Filters & Search</h3>
+            <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <!-- Search by Bill Number or Customer -->
+                <div>
+                    <label class="block text-sm font-medium mb-1">Search</label>
+                    <input type="text" name="search" value="{{ request.GET.search }}" 
+                           placeholder="Bill number or customer..." 
+                           class="input input-sm input-bordered w-full">
+                </div>
+                
+                <!-- Filter by Payment Status -->
+                <div>
+                    <label class="block text-sm font-medium mb-1">Payment Status</label>
+                    <select name="status" class="select select-sm select-bordered w-full">
+                        <option value="">All Statuses</option>
+                        <option value="Paid" {% if request.GET.status == 'Paid' %}selected{% endif %}>Paid</option>
+                        <option value="Unpaid" {% if request.GET.status == 'Unpaid' %}selected{% endif %}>Unpaid</option>
+                        <option value="Partial" {% if request.GET.status == 'Partial' %}selected{% endif %}>Partial</option>
+                    </select>
+                </div>
+                
+                <!-- Date Range Filter -->
+                <div>
+                    <label class="block text-sm font-medium mb-1">From Date</label>
+                    <input type="date" name="date_from" value="{{ request.GET.date_from }}" 
+                           class="input input-sm input-bordered w-full">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">To Date</label>
+                    <input type="date" name="date_to" value="{{ request.GET.date_to }}" 
+                           class="input input-sm input-bordered w-full">
+                </div>
+                
+                <!-- Filter Actions -->
+                <div class="md:col-span-4 flex gap-2">
+                    <button type="submit" class="btn btn-sm btn-primary">Apply Filters</button>
+                    <a href="{% url 'bills_list' %}" class="btn btn-sm btn-outline">Clear</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Bills Table -->
+        <div class="overflow-x-auto">
+            <table class="table table-zebra w-full">
+                <thead>
+                    <tr class="bg-base-200">
+                        <th>
+                            <a href="?{% if request.GET.ordering == 'bill_number' %}-{% endif %}bill_number{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}" 
+                               class="hover:underline">
+                                Bill Number
+                                {% if request.GET.ordering == 'bill_number' %}↑{% elif request.GET.ordering == '-bill_number' %}↓{% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a href="?ordering={% if request.GET.ordering == 'customer__name' %}-{% endif %}customer__name{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}" 
+                               class="hover:underline">
+                                Customer
+                                {% if request.GET.ordering == 'customer__name' %}↑{% elif request.GET.ordering == '-customer__name' %}↓{% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a href="?ordering={% if request.GET.ordering == 'date' %}-{% endif %}date{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}" 
+                               class="hover:underline">
+                                Date
+                                {% if request.GET.ordering == 'date' %}↑{% elif request.GET.ordering == '-date' %}↓{% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a href="?ordering={% if request.GET.ordering == 'total_amount' %}-{% endif %}total_amount{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}" 
+                               class="hover:underline">
+                                Total Amount
+                                {% if request.GET.ordering == 'total_amount' %}↑{% elif request.GET.ordering == '-total_amount' %}↓{% endif %}
+                            </a>
+                        </th>
+                        <th>Payment Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bill in bills %}
+                    <tr class="hover:bg-base-100">
+                        <td class="font-mono text-sm">{{ bill.bill_number }}</td>
+                        <td>
+                            <div class="font-semibold">{{ bill.customer.name }}</div>
+                            {% if bill.customer.phone %}
+                            <div class="text-sm text-gray-500">{{ bill.customer.phone }}</div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div>{{ bill.date|date:"d M, Y" }}</div>
+                            <div class="text-sm text-gray-500">{{ bill.date|date:"H:i" }}</div>
+                        </td>
+                        <td class="font-semibold">Rs. {{ bill.total_amount }}</td>
+                        <td>
+                            {% if bill.payment_status == 'Paid' %}
+                                <span class="badge badge-success">{{ bill.payment_status }}</span>
+                            {% elif bill.payment_status == 'Unpaid' %}
+                                <span class="badge badge-error">{{ bill.payment_status }}</span>
+                            {% else %}
+                                <span class="badge badge-warning">{{ bill.payment_status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="flex gap-2">
+                                <a href="{% url 'bill_detail_htmx' bill.pk %}" 
+                                   class="btn btn-xs btn-primary">View</a>
+                                <!-- Add more action buttons as needed -->
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-8 text-gray-500">
+                            No bills found. 
+                            <a href="{% url 'new_bill_page' %}" class="link link-primary">Create your first bill</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination (if you add it later) -->
+        {% if is_paginated %}
+        <div class="flex justify-center mt-6">
+            <div class="btn-group">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}" class="btn">«</a>
+                {% endif %}
+                
+                <span class="btn btn-active">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}" class="btn">»</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
 
         <hr class="my-6" />
-
         <div id="bill-detail">
             <p>Select a bill to see details here.</p>
         </div>
     </div>
 </body>
-
 </html>
